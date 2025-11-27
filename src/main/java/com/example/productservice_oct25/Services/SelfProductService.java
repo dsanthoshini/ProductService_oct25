@@ -6,13 +6,18 @@ import com.example.productservice_oct25.Repositories.CategoryRepository;
 import com.example.productservice_oct25.Repositories.ProductRepository;
 import com.example.productservice_oct25.Exceptions.ProductNotFoundException;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Primary //bcz spring confuse b/w fake and self service which one to choose for injection
+//for deploying ebs we are commenting this primary annotation
 public class SelfProductService implements ProductServices {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -106,5 +111,16 @@ public class SelfProductService implements ProductServices {
         return null;
     }
 
+    @Override
+    public Page<Product> getProductsByTitle(String title, int pageNumber, int pageSize) {
+//sorting based on price in ascending order
+        Sort sort = Sort.by(Sort.Direction.ASC, "price");
+//pageable is interface so we cannot create object,
+// pageRequest is class implemented by pageable so we can create obj for pageRequest class
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+
+        return productRepository.findByTitleContainsIgnoreCase(title, pageRequest, sort);
+    }
 
 }
+

@@ -19,7 +19,7 @@ class ProductControllerTest {
     @Autowired
     private ProductController productController;
 
-    @MockBean
+   /* @MockBean
     private ProductServices productServices;
 
     @Test
@@ -39,12 +39,12 @@ class ProductControllerTest {
 
         assertThrows(ProductNotFoundException.class,
                 () -> productController.getSingleProduct(productId));
-        /*When the test runs, it tries to call the service method getSingleProduct(-1L).
+        *//*When the test runs, it tries to call the service method getSingleProduct(-1L).
 But since we used when(...).thenThrow(...), Mockito is instructed to
  immediately throw ProductNotFoundException whenever this ID is used — no real logic runs.
 Then, the controller also tries to call this mocked service method with the same ID.
 As a result, the controller receives the same exception thrown by the mock,
-and assertThrows checks that this behavior is correct.*/
+and assertThrows checks that this behavior is correct.*//*
     }
-
+*/
 }

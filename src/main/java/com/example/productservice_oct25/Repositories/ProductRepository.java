@@ -2,9 +2,14 @@ package com.example.productservice_oct25.Repositories;
 
 import com.example.productservice_oct25.Model.Product;
 import com.example.productservice_oct25.projections.ProductWithTitleAndPrice;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 import java.util.Optional;
 import java.util.List;
 
@@ -31,6 +36,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     //select * from products where title like '%str%'
     List<Product> findByTitleContains(String str);
+
+    // select * from products where title LIKE '%iPhone%' limit x offset y
+//i want to search product by title,don't want complete so adding paging for to get limited result
+    Page<Product> findByTitleContainsIgnoreCase(String str, Pageable pageable, Sort sort);
 
 
     //select * from products where title= 'some title' and price between 10 and 50

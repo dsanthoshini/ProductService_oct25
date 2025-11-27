@@ -4,6 +4,8 @@ import com.example.productservice_oct25.Exceptions.ProductNotFoundException;
 import com.example.productservice_oct25.Model.Category;
 import com.example.productservice_oct25.Model.Product;
 import com.example.productservice_oct25.dtos.FakeStoreProductServiceDTOs;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+//@Primary
 public class FakeStoreProductService implements ProductServices {
 
     private final RestTemplate restTemplate;
@@ -109,6 +112,11 @@ public class FakeStoreProductService implements ProductServices {
 
     @Override
     public Product deleteproduct(Long productId) {
+        return null;
+    }
+
+    @Override
+    public Page<Product> getProductsByTitle(String title, int pageNumber, int pageSize) {
         return null;
     }
 }

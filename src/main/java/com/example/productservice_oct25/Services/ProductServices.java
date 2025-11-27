@@ -2,6 +2,7 @@ package com.example.productservice_oct25.Services;
 
 import com.example.productservice_oct25.Exceptions.ProductNotFoundException;
 import com.example.productservice_oct25.Model.Product;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -22,4 +23,8 @@ public interface ProductServices {
 
     // Delete product by ID
     Product deleteproduct(Long productId);
+
+    //search product by title.
+    // this is interface so implement this method in selfproductservice,fakestoreproduct service
+    Page<Product> getProductsByTitle(String title, int pageNumber, int pageSize);
 }
