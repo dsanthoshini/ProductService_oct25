@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Primary //bcz spring confuse b/w fake and self service which one to choose for injection
+//@Primary //bcz spring confuse b/w fake and self service which one to choose for injection
 //for deploying ebs we are commenting this primary annotation
 public class SelfProductService implements ProductServices {
     private final ProductRepository productRepository;
@@ -119,7 +119,7 @@ public class SelfProductService implements ProductServices {
 // pageRequest is class implemented by pageable so we can create obj for pageRequest class
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
 
-        return productRepository.findByTitleContainsIgnoreCase(title, pageRequest, sort);
+        return productRepository.findByTitleContainsIgnoreCase(title, pageRequest);
     }
 
 }

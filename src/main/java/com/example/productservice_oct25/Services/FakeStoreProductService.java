@@ -6,6 +6,7 @@ import com.example.productservice_oct25.Model.Product;
 import com.example.productservice_oct25.dtos.FakeStoreProductServiceDTOs;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,15 +14,17 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-//@Primary
+@Service("fakeStoreProductService")
+@Primary
 public class FakeStoreProductService implements ProductServices {
 
-    private final RestTemplate restTemplate;
+    private  RestTemplate restTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
-    // ✅ Constructor injection for RestTemplate
-    public FakeStoreProductService(RestTemplate restTemplate) {
+    public FakeStoreProductService
+            (RestTemplate restTemplate,RedisTemplate<String, Object> redisTemplate) {
         this.restTemplate = restTemplate;
+        this.redisTemplate = redisTemplate;
     }
 
     // ✅ Fetch all products from FakeStore API
@@ -57,26 +60,39 @@ public class FakeStoreProductService implements ProductServices {
     // ✅ Fetch a single product by ID
     @Override
     public Product getSingleProduct(Long productId) throws ProductNotFoundException {
-
         // ✅ Make a GET request to FakeStore API to fetch a single product by its ID
         // Example: https://fakestoreapi.com/products/1
-        ResponseEntity<FakeStoreProductServiceDTOs> responseEntity =
-                restTemplate.getForEntity(
-                        "https://fakestoreapi.com/products/" + productId, // dynamic product ID
-                        FakeStoreProductServiceDTOs.class                 // expected response type
-                );
 
-        // ✅ Extract the response body (DTO object)
-        FakeStoreProductServiceDTOs productDTO = responseEntity.getBody();
 
-        // ✅ Check if product exists
-        if (productDTO == null) {
-            throw new ProductNotFoundException(productId);
+//first check product with id is present in redis cache or not. product is not
+        //if product is not null so return product from cache
+        Product prod = (Product) redisTemplate.opsForHash().get("PRODUCTS", productId);
+        if (prod != null) {
+            // Cache HIT
+            return prod;
         }
 
-        // ✅ Convert the FakeStore DTO → Product model using helper method
-        return convertDTOToProduct(productDTO);
+// not available in cache get it from fakestore
+        ResponseEntity<FakeStoreProductServiceDTOs> responseEntity =
+                restTemplate.getForEntity(
+                        "https://fakestoreapi.com/products/" + productId,
+                        FakeStoreProductServiceDTOs.class);
+//if product id is invalid fakestore will return null body
+        FakeStoreProductServiceDTOs fakeStoreProductDto = responseEntity.getBody();
+//if product id is valid it will return product details
+        if (fakeStoreProductDto == null) {
+            // Invalid productId
+            throw new ProductNotFoundException(productId);
+        }
+//if product id is valid it will convert dto to product model
+        Product product = convertDTOToProduct(fakeStoreProductDto);
+        //before returning product store it in redis cache
+        redisTemplate.opsForValue().set("product:"+productId,product);
+
+//return the product
+        return product;
     }
+
 
     // ✅ Private helper method to convert FakeStore DTO → Product model
     private Product convertDTOToProduct(FakeStoreProductServiceDTOs productDTO) {

@@ -23,7 +23,6 @@ public class ProductController {
     //@Autowired
    //private FakeStoreProductService productServices;
 
-
     private final ProductServices productServices;
 
     public ProductController(ProductServices productServices) {
@@ -73,6 +72,14 @@ Calls AuthCommons.validateToken(tokenValue) to check if the token is valid.
 If valid → fetches the product using productService.getSingleProduct(productId)
 and returns 200 OK.If invalid → returns 401 Unauthorized response.*/
 
+    @GetMapping("/{productId}")
+    public ResponseEntity<Product> getSingleProductWithoutToken(
+            @PathVariable("productId") Long productId)
+            throws ProductNotFoundException {
+
+        Product product = productServices.getSingleProduct(productId);
+        return new ResponseEntity<>(product, HttpStatus.OK);
+    }
 
 
 

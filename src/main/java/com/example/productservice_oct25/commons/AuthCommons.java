@@ -21,7 +21,7 @@ public  class AuthCommons {
     public static boolean validateToken(String tokenValue) {
         //call the userService to validate the token, we get it in responseentity so
         UserDto userDto = restTemplate.getForObject
-                ("http://localhost:8080/users/validate/" + tokenValue, UserDto.class);
+                ("http://localhost:9000/users/validate/" + tokenValue, UserDto.class);
         //i want to capture the response of userDto class so use that class here.
         // we get in ResponseEntity
         if (userDto != null) {

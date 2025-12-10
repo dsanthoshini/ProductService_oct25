@@ -39,7 +39,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // select * from products where title LIKE '%iPhone%' limit x offset y
 //i want to search product by title,don't want complete so adding paging for to get limited result
-    Page<Product> findByTitleContainsIgnoreCase(String str, Pageable pageable, Sort sort);
+    Page<Product> findByTitleContainsIgnoreCase(String str, Pageable pageable);
 
 
     //select * from products where title= 'some title' and price between 10 and 50
