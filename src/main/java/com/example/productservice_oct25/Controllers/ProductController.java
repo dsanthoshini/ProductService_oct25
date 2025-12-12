@@ -10,24 +10,32 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.List;
+
+
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-    @Autowired
-    private AuthCommons authCommons;
+
+    private final AuthCommons authCommons;
+    private final RestTemplate restTemplate;      // <-- LoadBalanced RestTemplate
+    private final ProductServices productServices;
+
+    public ProductController(ProductServices productServices,
+                             RestTemplate restTemplate,      // <-- inject LoadBalanced bean
+                             AuthCommons authCommons) {
+        this.restTemplate = restTemplate;
+        this.productServices = productServices;
+        this.authCommons = authCommons;
+    }
 
     //using fakestore service for elastic beanstalk deployment so commented below productservices
     //@Autowired
    //private FakeStoreProductService productServices;
 
-    private final ProductServices productServices;
-
-    public ProductController(ProductServices productServices) {
-
-        this.productServices = productServices;}
 
   /*  @GetMapping("/{productId}/{tokenValue}")
     public ResponseEntity<?> getSingleProduct(
@@ -59,7 +67,7 @@ public class ProductController {
         ResponseEntity<Product> responseEntity;
 
         // Validate token before fetching the product
-        if (AuthCommons.validateToken(tokenValue)) {
+        if (authCommons.validateToken(tokenValue)) {
             product = productServices.getSingleProduct(productId);
             responseEntity = new ResponseEntity<>(product, HttpStatus.OK);
         } else {
@@ -81,6 +89,21 @@ and returns 200 OK.If invalid → returns 401 Unauthorized response.*/
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
+    @GetMapping("/test/{productId}")
+    public ResponseEntity<Product> getSingleProduct_UserServiceTest(
+            @PathVariable Long productId) {
+
+        System.out.println("Calling UserService from ProductService...");
+
+        // Test call to UserService
+        //restTemplate.getForEntity("http://UserServiceNov25/users/sample", Void.class);
+        restTemplate.getForEntity("http://USERSERVICENOV25/users/sample", Void.class);
+
+        // Fetch product
+        Product product = productServices.getSingleProduct(productId);
+
+        return ResponseEntity.ok(product);
+    }
 
 
     // ✅ Get all products

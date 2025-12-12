@@ -4,6 +4,7 @@ import com.example.productservice_oct25.Exceptions.ProductNotFoundException;
 import com.example.productservice_oct25.Model.Category;
 import com.example.productservice_oct25.Model.Product;
 import com.example.productservice_oct25.dtos.FakeStoreProductServiceDTOs;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,11 +22,13 @@ public class FakeStoreProductService implements ProductServices {
     private  RestTemplate restTemplate;
     private RedisTemplate<String, Object> redisTemplate;
 
-    public FakeStoreProductService
-            (RestTemplate restTemplate,RedisTemplate<String, Object> redisTemplate) {
-        this.restTemplate = restTemplate;
+    public FakeStoreProductService(
+            @Qualifier("normalRestTemplate") RestTemplate restTemplate,
+            RedisTemplate<String, Object> redisTemplate) {
+        this.restTemplate = restTemplate;   // ✅ now normal restTemplate is used
         this.redisTemplate = redisTemplate;
     }
+
 
     // ✅ Fetch all products from FakeStore API
     @Override
@@ -66,7 +69,8 @@ public class FakeStoreProductService implements ProductServices {
 
 //first check product with id is present in redis cache or not. product is not
         //if product is not null so return product from cache
-        Product prod = (Product) redisTemplate.opsForHash().get("PRODUCTS", productId);
+       // Product prod = (Product) redisTemplate.opsForHash().get("PRODUCTS", productId);
+        Product prod = (Product) redisTemplate.opsForValue().get("PRODUCTS:" + productId);
         if (prod != null) {
             // Cache HIT
             return prod;
@@ -87,7 +91,9 @@ public class FakeStoreProductService implements ProductServices {
 //if product id is valid it will convert dto to product model
         Product product = convertDTOToProduct(fakeStoreProductDto);
         //before returning product store it in redis cache
-        redisTemplate.opsForValue().set("product:"+productId,product);
+        //redisTemplate.opsForValue().set("product:"+productId,product);
+        redisTemplate.opsForValue().set("PRODUCTS:" + productId, product);
+
 
 //return the product
         return product;
